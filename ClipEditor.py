@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+"""
+ClipEditor.py: Create video clips from a source video using information from a .csv formatted input file.
+"""
+
+__author__ = "Jeremy Whitcher"
+__contact__ = "jwwhitch@gmail.cm"
+__license__ = "MIT License"
+__date__ = "2023-12-30"
+__version__ = "1.0.0"
+__status__ = "Production"
+
 import os
 import csv
 import yaml
