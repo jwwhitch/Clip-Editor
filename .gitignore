@@ -2,3 +2,5 @@
 *.log
 *.mp4
 *.mp3
+*.csv
+settings.yaml

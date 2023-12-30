@@ -1,0 +1,6 @@
+clip_file: 'clip_file'
+destination_path: 'destination/path'
+compression: slow
+threads: 8
+vcodec: libx264
+fps: 30
