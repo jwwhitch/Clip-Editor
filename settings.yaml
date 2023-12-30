@@ -1,4 +1,5 @@
 clip_file: 'D:\Development\ClipEditor\2023 Video Review CFA Escola.csv'
+destination_path: 'C:\Users\jwwhi\Downloads'
 compression: slow
 threads: 8
 vcodec: libx264

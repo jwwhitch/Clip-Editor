@@ -171,7 +171,7 @@ def edit_video(settings):
             if editor:
                 editor.close_source()
             editor = VideoEditor(source, settings)
-        editor.create_clip(start_time, end_time, name)
+        editor.create_clip(start_time, end_time, os.path.join(settings['destination_path'], name))
     if editor:
         editor.close_source()
 
