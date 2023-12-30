@@ -7,6 +7,15 @@ from logging.handlers import RotatingFileHandler
 
 
 def init_logger(log_filename):
+    """
+    Initializes a logger that writes to both the console and a rotating log file.
+
+    Parameters:
+    log_filename (str): The name of the log file.
+
+    Returns:
+    logger: A logger object.
+    """
     logger = logging.getLogger(log_filename)
     logger.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler()
@@ -31,16 +40,22 @@ class VideoEditor:
 
     @staticmethod
     def _convert_to_hms(time_str):
-        logger.debug(f'time conversion for {time_str}')
+        logger.debug(f'Time conversion for {time_str}')
         minutes, seconds = map(int, time_str.split(':'))
         hours = minutes // 60
         minutes %= 60
         return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
+    def close_source(self):
+        self.video.close()
+
     def create_clip(self, start_time, end_time, output_file):
         clip_start = VideoEditor._convert_to_hms(start_time)
         clip_end = VideoEditor._convert_to_hms(end_time)
         clip_name = f"{output_file}_{clip_start.replace(':', '')}-{clip_end.replace(':', '')}.mp4"
+        if os.path.exists(clip_name):
+            logger.info(f'Skipping {clip_name}, a file already exists.')
+            return
         clip = self.video.subclip(clip_start, clip_end)
         os.makedirs(os.path.dirname(clip_name), exist_ok=True)
         clip.write_videofile(
@@ -59,8 +74,8 @@ class VideoClipCSVReader:
     @staticmethod
     def _generate_clip_name(row):
         # From, To, Name, Play, Game, File
-        base_file = os.path.basename(os.path.splitext(row['File'])[0])
-        path = f"{base_file}-{row['Name']}".replace(' ','_')
+        base_file = os.path.basename(os.path.splitext(row['File'])[0]).replace('(', '').replace(')', '')
+        path = f"{base_file}-{row['Name']}".replace(' ', '_')
         name = f"{base_file}-{row['Name']}-{row['Play']}".replace(' ', '_')
         return os.path.join(path, name)
 
@@ -68,7 +83,8 @@ class VideoClipCSVReader:
         with open(self.filename, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                row['Clip Name'] = VideoClipCSVReader._generate_clip_name(row)
+                clip = row
+                clip['Clip Name'] = VideoClipCSVReader._generate_clip_name(clip)
                 yield row
 
 
@@ -78,15 +94,19 @@ def edit_video(settings):
     editor = None
     for clip in clips.clip_list():
         source = clip['File']
-        name = clip['Clip Name']
+        name = clip['Clip Name'].strip()
         start_time = clip['From'].strip()
         end_time = clip['To'].strip()
-        logger.info(f"processing {source} {start_time}-{end_time}")
+        logger.info(f"Processing {source} {start_time}-{end_time}")
         if clip['File'] and prev_source != source:
-            logger.debug(f"creating a new class for {source}")
+            logger.debug(f"Creating a new class for {source}")
             prev_source = source
+            if editor:
+                editor.close_source()
             editor = VideoEditor(source, settings)
         editor.create_clip(start_time, end_time, name)
+    if editor:
+        editor.close_source()
 
 
 def main():
