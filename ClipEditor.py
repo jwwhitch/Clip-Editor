@@ -28,11 +28,11 @@ def init_logger(log_filename):
     :rtype: logging.Logger
     """
     logger = logging.getLogger(log_filename)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(logging.INFO)
     file_handler = RotatingFileHandler(f"{log_filename}.log", backupCount=5)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
@@ -105,6 +105,7 @@ class VideoEditor:
             fps=self.settings['fps'],
             codec=self.settings['vcodec'],
             preset=self.settings['compression'],
+            logger=None,
             ffmpeg_params=["-crf", str(self.settings['fps'])])
 
 
